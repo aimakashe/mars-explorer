@@ -136,3 +136,115 @@ body {
 .back-link:hover {
   background-color: #357abd;
 }
+
+
+/* Mars Rover Search Page styles */
+.page-mars-rover-search {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.page-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.page-title {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+  color: #4a90e2;
+}
+
+.page-subtitle {
+  font-size: 1.2rem;
+  color: #888;
+}
+
+.search-section {
+  background-color: #1a1f3a;
+  padding: 2rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+}
+
+.search-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.loading,
+.error,
+.no-results {
+  text-align: center;
+  padding: 3rem;
+  font-size: 1.2rem;
+}
+
+.error {
+  color: #ff6b6b;
+}
+
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.photo-card {
+  background-color: #1a1f3a;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: transform 0.3s;
+}
+
+.photo-card:hover {
+  transform: translateY(-5px);
+}
+
+.photo-image {
+  width: 100%;
+  height: 250px;
+  object-fit: cover;
+}
+
+.photo-info {
+  padding: 1rem;
+}
+
+.photo-info p {
+  margin: 0.5rem 0;
+  font-size: 0.9rem;
+  color: #e0e0e0;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.page-number {
+  font-size: 1.1rem;
+  color: #e0e0e0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .search-inputs {
+    grid-template-columns: 1fr;
+  }
+
+  .photo-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .page-title {
+    font-size: 2rem;
+  }
+}
