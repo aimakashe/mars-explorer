@@ -110,3 +110,29 @@ body {
 .not-found-link:hover {
   background-color: #357abd;
 }
+
+/* Photo Detail Page styles */
+.page-photo-detail {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.photo-detail-content {
+  text-align: center;
+}
+
+.back-link {
+  display: inline-block;
+  margin-top: 2rem;
+  padding: 0.75rem 1.5rem;
+  background-color: #4a90e2;
+  color: white;
+  text-decoration: none;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
+
+.back-link:hover {
+  background-color: #357abd;
+}
