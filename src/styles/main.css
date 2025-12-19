@@ -63,3 +63,50 @@ body {
   cursor: not-allowed;
   opacity: 0.6;
 }
+
+/* 404 Page styles */
+.page-not-found {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  text-align: center;
+}
+
+.not-found-content {
+  max-width: 500px;
+  padding: 2rem;
+}
+
+.not-found-title {
+  font-size: 6rem;
+  font-weight: bold;
+  color: #4a90e2;
+  margin-bottom: 1rem;
+}
+
+.not-found-message {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  color: #e0e0e0;
+}
+
+.not-found-description {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+  color: #888;
+}
+
+.not-found-link {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  background-color: #4a90e2;
+  color: white;
+  text-decoration: none;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
+
+.not-found-link:hover {
+  background-color: #357abd;
+}
