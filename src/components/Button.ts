@@ -13,8 +13,11 @@ interface ButtonState {
 }
 
 export class Button extends BaseComponent<ButtonProps, ButtonState> {
+  private handleClickBound: ((event: Event) => void) | null = null;
+
   constructor(props: ButtonProps) {
     super('div', props, { disabled: props.disabled || false });
+    this.handleClickBound = this.handleClick.bind(this);
   }
 
   render(): string {
@@ -37,13 +40,21 @@ export class Button extends BaseComponent<ButtonProps, ButtonState> {
   }
 
   protected componentDidUpdate(): void {
+    this.removeEventListeners();
     this.attachEventListeners();
   }
 
   private attachEventListeners(): void {
     const button = this.element.querySelector('button');
-    if (button) {
-      button.addEventListener('click', this.handleClick.bind(this));
+    if (button && this.handleClickBound) {
+      button.addEventListener('click', this.handleClickBound);
+    }
+  }
+
+  private removeEventListeners(): void {
+    const button = this.element.querySelector('button');
+    if (button && this.handleClickBound) {
+      button.removeEventListener('click', this.handleClickBound);
     }
   }
 
@@ -60,9 +71,6 @@ export class Button extends BaseComponent<ButtonProps, ButtonState> {
   }
 
   protected componentWillUnmount(): void {
-    const button = this.element.querySelector('button');
-    if (button) {
-      button.removeEventListener('click', this.handleClick.bind(this));
-    }
+    this.removeEventListeners();
   }
 }

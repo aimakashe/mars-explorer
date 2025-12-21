@@ -14,8 +14,11 @@ interface InputState {
 }
 
 export class Input extends BaseComponent<InputProps, InputState> {
+  private handleInputBound: ((event: Event) => void) | null = null;
+
   constructor(props: InputProps) {
     super('div', props, { value: props.value || '' });
+    this.handleInputBound = this.handleInput.bind(this);
   }
 
   render(): string {
@@ -41,13 +44,22 @@ export class Input extends BaseComponent<InputProps, InputState> {
   }
 
   protected componentDidUpdate(): void {
+    // Удаляем старые обработчики перед добавлением новых
+    this.removeEventListeners();
     this.attachEventListeners();
   }
 
   private attachEventListeners(): void {
     const input = this.element.querySelector('input');
-    if (input) {
-      input.addEventListener('input', this.handleInput.bind(this));
+    if (input && this.handleInputBound) {
+      input.addEventListener('input', this.handleInputBound);
+    }
+  }
+
+  private removeEventListeners(): void {
+    const input = this.element.querySelector('input');
+    if (input && this.handleInputBound) {
+      input.removeEventListener('input', this.handleInputBound);
     }
   }
 
@@ -71,9 +83,6 @@ export class Input extends BaseComponent<InputProps, InputState> {
   }
 
   protected componentWillUnmount(): void {
-    const input = this.element.querySelector('input');
-    if (input) {
-      input.removeEventListener('input', this.handleInput.bind(this));
-    }
+    this.removeEventListeners();
   }
 }
