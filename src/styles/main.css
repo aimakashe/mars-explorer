@@ -112,20 +112,61 @@ body {
 }
 
 /* Photo Detail Page styles */
+
 .page-photo-detail {
   padding: 2rem;
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
 }
 
-.photo-detail-content {
-  text-align: center;
+.detail-header {
+  margin-bottom: 2rem;
 }
 
-.back-link {
+.back-button {
   display: inline-block;
-  margin-top: 2rem;
   padding: 0.75rem 1.5rem;
+  background-color: #1a1f3a;
+  color: #4a90e2;
+  text-decoration: none;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+  margin-bottom: 1rem;
+}
+
+.back-button:hover {
+  background-color: #252b47;
+}
+
+.detail-title {
+  font-size: 2.5rem;
+  color: #4a90e2;
+  margin-top: 1rem;
+}
+
+.detail-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+}
+
+.detail-image-container {
+  position: sticky;
+  top: 2rem;
+  height: fit-content;
+}
+
+.detail-image {
+  width: 100%;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  margin-bottom: 1rem;
+}
+
+.view-original {
+  display: block;
+  text-align: center;
+  padding: 0.75rem;
   background-color: #4a90e2;
   color: white;
   text-decoration: none;
@@ -133,8 +174,87 @@ body {
   transition: background-color 0.3s;
 }
 
-.back-link:hover {
+.view-original:hover {
   background-color: #357abd;
+}
+
+.detail-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.info-section {
+  background-color: #1a1f3a;
+  padding: 1.5rem;
+  border-radius: 8px;
+}
+
+.info-section h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: #e0e0e0;
+}
+
+.info-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.75rem;
+  background-color: #0a0e27;
+  border-radius: 4px;
+  border-left: 3px solid #4a90e2;
+}
+
+.info-label {
+  font-weight: 600;
+  color: #888;
+}
+
+.info-value {
+  color: #e0e0e0;
+  text-align: right;
+}
+
+.status-active {
+  color: #4caf50;
+  font-weight: bold;
+}
+
+.status-complete {
+  color: #ff9800;
+  font-weight: bold;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .detail-content {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-image-container {
+    position: relative;
+    top: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .detail-title {
+    font-size: 1.8rem;
+  }
+
+  .info-item {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .info-value {
+    text-align: left;
+  }
 }
 
 
@@ -305,3 +425,4 @@ body {
 .retry-button:hover {
   background-color: #357abd;
 }
+

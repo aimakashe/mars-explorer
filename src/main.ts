@@ -22,3 +22,4 @@ router.setNotFound(PageNotFound);
 
 // Запускаем роутер
 router.start();
+
