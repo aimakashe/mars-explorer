@@ -48,6 +48,11 @@ export class PageMarsRoverSearch extends BaseComponent<Record<string, unknown>, 
             <div data-child-key="sol-input"></div>
           </div>
           <div data-child-key="search-button"></div>
+          
+          <div class="search-hint">
+            <p><strong>Available rovers:</strong> Curiosity, Perseverance, Opportunity, Spirit</p>
+            <p><strong>Sol</strong> is a Martian day (slightly longer than Earth day)</p>
+          </div>
         </div>
 
         <% if (loading) { %>
@@ -188,9 +193,47 @@ export class PageMarsRoverSearch extends BaseComponent<Record<string, unknown>, 
   }
 
   private handleSearch(): void {
-    this.setState({ currentPage: 1 });
-    this.loadPhotos();
+  // Валидация rover name
+  const validRovers = ['curiosity', 'perseverance', 'opportunity', 'spirit'];
+  const roverName = this.state.roverName.toLowerCase().trim();
+  
+  if (!roverName) {
+    this.setState({ 
+      error: 'Please enter a rover name',
+      photos: []
+    });
+    return;
   }
+
+  if (!validRovers.includes(roverName)) {
+    this.setState({ 
+      error: `Invalid rover name. Please use: ${validRovers.join(', ')}`,
+      photos: []
+    });
+    return;
+  }
+
+  // Валидация sol
+  if (this.state.sol < 0) {
+    this.setState({ 
+      error: 'Sol (day) must be a positive number',
+      photos: []
+    });
+    return;
+  }
+
+  if (this.state.sol > 10000) {
+    this.setState({ 
+      error: 'Sol (day) is too large. Please enter a value less than 10000',
+      photos: []
+    });
+    return;
+  }
+
+  // Если валидация прошла, загружаем фото
+  this.setState({ currentPage: 1, roverName });
+  this.loadPhotos();
+}
 
   private handlePrevPage(): void {
     if (this.state.currentPage > 1) {

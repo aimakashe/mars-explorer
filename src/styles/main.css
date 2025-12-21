@@ -112,7 +112,6 @@ body {
 }
 
 /* Photo Detail Page styles */
-
 .page-photo-detail {
   padding: 2rem;
   max-width: 1400px;
@@ -230,34 +229,6 @@ body {
   font-weight: bold;
 }
 
-/* Responsive */
-@media (max-width: 1024px) {
-  .detail-content {
-    grid-template-columns: 1fr;
-  }
-
-  .detail-image-container {
-    position: relative;
-    top: 0;
-  }
-}
-
-@media (max-width: 768px) {
-  .detail-title {
-    font-size: 1.8rem;
-  }
-
-  .info-item {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .info-value {
-    text-align: left;
-  }
-}
-
-
 /* Mars Rover Search Page styles */
 .page-mars-rover-search {
   padding: 2rem;
@@ -295,18 +266,88 @@ body {
   margin-bottom: 1rem;
 }
 
-.loading,
-.error,
+/* Search hint */
+.search-hint {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background-color: #0a0e27;
+  border-radius: 4px;
+  border-left: 3px solid #4a90e2;
+}
+
+.search-hint p {
+  margin: 0.5rem 0;
+  font-size: 0.9rem;
+  color: #888;
+}
+
+.search-hint strong {
+  color: #4a90e2;
+}
+
+/* Loading spinner */
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem;
+  gap: 1rem;
+}
+
+.loading p {
+  color: #888;
+  font-size: 1.1rem;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #333;
+  border-top-color: #4a90e2;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Error and No Results states */
+.error {
+  background-color: #2d1f1f;
+  border: 2px solid #ff6b6b;
+  border-radius: 8px;
+  padding: 2rem;
+  text-align: center;
+  color: #ff6b6b;
+}
+
+.error h2 {
+  margin-bottom: 1rem;
+  color: #ff8787;
+}
+
+.error p {
+  margin-bottom: 1rem;
+}
+
 .no-results {
   text-align: center;
   padding: 3rem;
   font-size: 1.2rem;
+  color: #888;
 }
 
-.error {
-  color: #ff6b6b;
+/* Results info */
+.results-info {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: #888;
 }
 
+/* Photo grid */
 .photo-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -314,15 +355,18 @@ body {
   margin-bottom: 2rem;
 }
 
+/* Photo card */
 .photo-card {
   background-color: #1a1f3a;
   border-radius: 8px;
   overflow: hidden;
   transition: transform 0.3s;
+  cursor: pointer;
 }
 
 .photo-card:hover {
   transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(74, 144, 226, 0.3);
 }
 
 .photo-image {
@@ -341,6 +385,13 @@ body {
   color: #e0e0e0;
 }
 
+.photo-sol {
+  margin: 0.5rem 0;
+  font-size: 0.9rem;
+  color: #4a90e2;
+}
+
+/* Pagination */
 .pagination {
   display: flex;
   justify-content: center;
@@ -354,7 +405,51 @@ body {
   color: #e0e0e0;
 }
 
-/* Responsive */
+/* Error retry button */
+.retry-button {
+  margin-top: 1rem;
+  padding: 0.75rem 1.5rem;
+  background-color: #4a90e2;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s;
+}
+
+.retry-button:hover {
+  background-color: #357abd;
+}
+
+/* Responsive - Photo Detail Page */
+@media (max-width: 1024px) {
+  .detail-content {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-image-container {
+    position: relative;
+    top: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .detail-title {
+    font-size: 1.8rem;
+  }
+
+  .info-item {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .info-value {
+    text-align: left;
+  }
+}
+
+/* Responsive - Search Page */
 @media (max-width: 768px) {
   .search-inputs {
     grid-template-columns: 1fr;
@@ -368,61 +463,3 @@ body {
     font-size: 2rem;
   }
 }
-
-/* Loading spinner */
-.loading {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 4rem;
-}
-
-.spinner {
-  width: 50px;
-  height: 50px;
-  border: 4px solid #333;
-  border-top-color: #4a90e2;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-bottom: 1rem;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-/* Results info */
-.results-info {
-  text-align: center;
-  margin-bottom: 1.5rem;
-  color: #888;
-}
-
-/* Photo card improvements */
-.photo-card {
-  cursor: pointer;
-}
-
-.photo-sol {
-  margin: 0.5rem 0;
-  font-size: 0.9rem;
-  color: #4a90e2;
-}
-
-/* Error retry button */
-.retry-button {
-  margin-top: 1rem;
-  padding: 0.75rem 1.5rem;
-  background-color: #4a90e2;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 1rem;
-}
-
-.retry-button:hover {
-  background-color: #357abd;
-}
-
