@@ -21,6 +21,9 @@ export abstract class BaseComponent<P = Record<string, unknown>, S = Record<stri
 
   // Обновление UI
   private update(): void {
+    // Размонтируем старые дочерние компоненты
+    this.unmountChildren();
+    
     const html = this.render();
     this.element.innerHTML = html;
     this.mountChildren();
@@ -61,6 +64,17 @@ export abstract class BaseComponent<P = Record<string, unknown>, S = Record<stri
 
   // Размонтирование всех дочерних компонентов
   private unmountChildren(): void {
+    this.children.forEach(child => {
+      // Только вызываем unmount, но не удаляем из Map
+      if (child.getElement().parentElement) {
+        child.unmount();
+      }
+    });
+    // НЕ очищаем children Map здесь!
+  }
+
+  // Очистка всех дочерних компонентов (вызывается только при полном unmount)
+  private clearChildren(): void {
     this.children.forEach(child => child.unmount());
     this.children.clear();
   }
@@ -81,5 +95,6 @@ export abstract class BaseComponent<P = Record<string, unknown>, S = Record<stri
 
   protected componentWillUnmount(): void {
     // Вызывается перед размонтированием
+    this.clearChildren();
   }
 }

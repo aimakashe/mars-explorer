@@ -21,6 +21,7 @@ export class PageMarsRoverSearch extends BaseComponent<Record<string, unknown>, 
   private searchButton: Button | null = null;
   private prevButton: Button | null = null;
   private nextButton: Button | null = null;
+  private photoCards: Map<string, MarsPhotoCard> = new Map();
 
   constructor() {
     super('div', {}, {
@@ -91,68 +92,85 @@ export class PageMarsRoverSearch extends BaseComponent<Record<string, unknown>, 
   }
 
   protected componentDidMount(): void {
-    this.createComponents();
+    this.createInputComponents();
     this.loadPhotos();
   }
 
   protected componentDidUpdate(): void {
+    // Пересоздаем input компоненты
+    this.createInputComponents();
+    // Пересоздаем карточки фото
     this.createPhotoCards();
   }
 
-  private createComponents(): void {
+  private createInputComponents(): void {
     // Rover Input
-    this.roverInput = new Input({
-      label: 'Rover Name',
-      placeholder: 'curiosity, perseverance, opportunity, spirit',
-      value: this.state.roverName,
-      id: 'rover-input',
-      onChange: (value: string) => {
-        this.state.roverName = value;
-      }
-    });
-    this.addChild('rover-input', this.roverInput);
+    if (!this.roverInput) {
+      this.roverInput = new Input({
+        label: 'Rover Name',
+        placeholder: 'curiosity, perseverance, opportunity, spirit',
+        value: this.state.roverName,
+        id: 'rover-input',
+        onChange: (value: string) => {
+          this.state.roverName = value;
+        }
+      });
+      this.addChild('rover-input', this.roverInput);
+    }
 
     // Sol Input
-    this.solInput = new Input({
-      label: 'Martian Sol (Day)',
-      placeholder: '1000',
-      value: String(this.state.sol),
-      type: 'number',
-      id: 'sol-input',
-      onChange: (value: string) => {
-        this.state.sol = parseInt(value) || 1000;
-      }
-    });
-    this.addChild('sol-input', this.solInput);
+    if (!this.solInput) {
+      this.solInput = new Input({
+        label: 'Martian Sol (Day)',
+        placeholder: '1000',
+        value: String(this.state.sol),
+        type: 'number',
+        id: 'sol-input',
+        onChange: (value: string) => {
+          this.state.sol = parseInt(value) || 1000;
+        }
+      });
+      this.addChild('sol-input', this.solInput);
+    }
 
     // Search Button
-    this.searchButton = new Button({
-      text: '🔍 Search',
-      onClick: () => this.handleSearch()
-    });
-    this.addChild('search-button', this.searchButton);
+    if (!this.searchButton) {
+      this.searchButton = new Button({
+        text: '🔍 Search',
+        onClick: () => this.handleSearch()
+      });
+      this.addChild('search-button', this.searchButton);
+    }
 
     // Prev Button
-    this.prevButton = new Button({
-      text: '← Previous',
-      onClick: () => this.handlePrevPage(),
-      disabled: this.state.currentPage === 1
-    });
-    this.addChild('prev-button', this.prevButton);
+    if (!this.prevButton) {
+      this.prevButton = new Button({
+        text: '← Previous',
+        onClick: () => this.handlePrevPage(),
+        disabled: this.state.currentPage === 1
+      });
+      this.addChild('prev-button', this.prevButton);
+    }
 
     // Next Button
-    this.nextButton = new Button({
-      text: 'Next →',
-      onClick: () => this.handleNextPage(),
-      disabled: this.state.photos.length < 25
-    });
-    this.addChild('next-button', this.nextButton);
-
-    // Create photo cards
-    this.createPhotoCards();
+    if (!this.nextButton) {
+      this.nextButton = new Button({
+        text: 'Next →',
+        onClick: () => this.handleNextPage(),
+        disabled: this.state.photos.length < 25
+      });
+      this.addChild('next-button', this.nextButton);
+    }
   }
 
   private createPhotoCards(): void {
+    // Очищаем старые карточки
+    this.photoCards.forEach((card, key) => {
+      card.unmount();
+    });
+    this.photoCards.clear();
+
+    // Создаем новые карточки
     this.state.photos.forEach((photo, index) => {
       const photoCard = new MarsPhotoCard({
         photo,
@@ -160,6 +178,7 @@ export class PageMarsRoverSearch extends BaseComponent<Record<string, unknown>, 
           window.location.hash = `/photo/${clickedPhoto.id}`;
         }
       });
+      this.photoCards.set(`photo-${index}`, photoCard);
       this.addChild(`photo-${index}`, photoCard);
     });
   }
