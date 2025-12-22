@@ -1,6 +1,6 @@
 import { BaseComponent } from './BaseComponent';
 
-type RouteComponent = new () => BaseComponent;
+type RouteComponent = new () => BaseComponent<unknown, unknown>;
 
 interface Route {
   path: string;
@@ -10,7 +10,7 @@ interface Route {
 export class Router {
   private routes: Route[] = [];
   private notFoundComponent: RouteComponent | null = null;
-  private currentComponent: BaseComponent | null = null;
+  private currentComponent: BaseComponent<unknown, unknown> | null = null;
   private rootElement: HTMLElement;
 
   constructor(rootElement: HTMLElement) {
