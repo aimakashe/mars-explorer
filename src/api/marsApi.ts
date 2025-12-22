@@ -12,7 +12,7 @@ export class MarsApi {
   async fetchPhotos(params: FetchPhotosParams): Promise<ApiResponse> {
     const { roverName, sol, camera, page = 1 } = params;
 
-    let url = `${this.baseUrl}/api/v1/rovers/${roverName}/photos?sol=${sol}&page=${page}`;
+    let url = `${this.baseUrl}/rovers/${roverName}/photos?sol=${sol}&page=${page}`;
 
     if (camera) {
       url += `&camera=${camera}`;

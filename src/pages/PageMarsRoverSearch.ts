@@ -52,9 +52,9 @@ export class PageMarsRoverSearch extends BaseComponent<Record<string, unknown>, 
           
           <div class="search-hint">
             <p><strong>Available rovers:</strong> Curiosity, Perseverance, Opportunity, Spirit</p>
-            <p><strong>Note:</strong> Currently only Curiosity and Perseverance have available data</p>
             <p><strong>Sol:</strong> Martian day number (0-10000)</p>
           </div>
+        </div>
 
         <% if (loading) { %>
           <div class="loading">
@@ -190,47 +190,36 @@ export class PageMarsRoverSearch extends BaseComponent<Record<string, unknown>, 
     this.loadPhotos();
   }
 
-private async loadPhotos(): Promise<void> {
-  this.setState({ loading: true, error: null });
+  private async loadPhotos(): Promise<void> {
+    this.setState({ loading: true, error: null });
 
-  try {
-    const response = await marsApi.fetchPhotos({
-      roverName: this.state.roverName.toLowerCase(),
-      sol: this.state.sol,
-      page: this.state.currentPage
-    });
-
-    this.setState({
-      photos: response.photos,
-      loading: false
-    });
-
-    // Update button states
-    if (this.prevButton) {
-      this.prevButton.setDisabled(this.state.currentPage === 1);
-    }
-    if (this.nextButton) {
-      this.nextButton.setDisabled(response.photos.length < 25);
-    }
-
-  } catch (error) {
-    // Проверяем, является ли это ошибкой 404 для неподдерживаемого ровера
-    const errorMessage = error instanceof Error ? error.message : 'Failed to load photos';
-    
-    if (errorMessage.includes('404') && 
-        (this.state.roverName === 'opportunity' || this.state.roverName === 'spirit')) {
-      this.setState({
-        loading: false,
-        error: `${this.state.roverName.charAt(0).toUpperCase() + this.state.roverName.slice(1)} rover data is not available in the current API. Please select Curiosity or Perseverance.`
+    try {
+      const response = await marsApi.fetchPhotos({
+        roverName: this.state.roverName.toLowerCase(),
+        sol: this.state.sol,
+        page: this.state.currentPage
       });
-    } else {
+
+      this.setState({
+        photos: response.photos,
+        loading: false
+      });
+
+      // Update button states
+      if (this.prevButton) {
+        this.prevButton.setDisabled(this.state.currentPage === 1);
+      }
+      if (this.nextButton) {
+        this.nextButton.setDisabled(response.photos.length < 25);
+      }
+
+    } catch (error) {
       this.setState({
         loading: false,
-        error: errorMessage
+        error: error instanceof Error ? error.message : 'Failed to load photos'
       });
     }
   }
-}
 
   private handlePrevPage(): void {
     if (this.state.currentPage > 1) {
