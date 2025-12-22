@@ -18,7 +18,6 @@ interface PageState {
 export class PageMarsRoverSearch extends BaseComponent<Record<string, unknown>, PageState> {
   private roverSelect: Select | null = null;
   private solInput: Input | null = null;
-  private searchButton: Button | null = null;
   private prevButton: Button | null = null;
   private nextButton: Button | null = null;
 
@@ -48,11 +47,10 @@ export class PageMarsRoverSearch extends BaseComponent<Record<string, unknown>, 
             <div data-child-key="rover-select"></div>
             <div data-child-key="sol-input"></div>
           </div>
-          <div data-child-key="search-button"></div>
           
           <div class="search-hint">
-            <p><strong>Rover:</strong> Select a Mars rover from the dropdown</p>
-            <p><strong>Sol:</strong> Martian day number (0-10000)</p>
+            <p><strong>Rover:</strong> Active Mars rovers with available photos</p>
+            <p><strong>Sol:</strong> Martian day number (0-10000). Photos load automatically when filters change.</p>
           </div>
         </div>
 
@@ -69,11 +67,11 @@ export class PageMarsRoverSearch extends BaseComponent<Record<string, unknown>, 
         <% } else if (photos.length === 0) { %>
           <div class="no-results">
             <p>🔍 No photos found</p>
-            <p>Try different search parameters</p>
+            <p>Try a different Sol number. Some days may not have photos.</p>
           </div>
         <% } else { %>
           <div class="results-info">
-            <p>Found <%= photos.length %> photos</p>
+            <p>Found <%= photos.length %> photos from <strong><%= photos[0].rover.name %></strong> on Sol <%= photos[0].sol %></p>
           </div>
           
           <div class="photo-grid">
@@ -113,19 +111,18 @@ export class PageMarsRoverSearch extends BaseComponent<Record<string, unknown>, 
   }
 
   private createComponents(): void {
-    // Rover Select
+    // Rover Select - только работающие роверы
     this.roverSelect = new Select({
       label: 'Mars Rover',
       id: 'rover-select',
       options: [
-        { value: 'curiosity', label: 'Curiosity' },
-        { value: 'perseverance', label: 'Perseverance' },
-        { value: 'opportunity', label: 'Opportunity' },
-        { value: 'spirit', label: 'Spirit' }
+        { value: 'curiosity', label: 'Curiosity (2012 - Present)' },
+        { value: 'perseverance', label: 'Perseverance (2021 - Present)' }
       ],
       value: this.state.roverName,
       onChange: (value: string) => {
         this.state.roverName = value;
+        this.handleFilterChange();
       }
     });
     this.addChild('rover-select', this.roverSelect);
@@ -138,17 +135,13 @@ export class PageMarsRoverSearch extends BaseComponent<Record<string, unknown>, 
       type: 'number',
       id: 'sol-input',
       onChange: (value: string) => {
-        this.state.sol = parseInt(value) || 1000;
+        const sol = parseInt(value) || 1000;
+        this.state.sol = sol;
+        // Автоматический поиск при изменении Sol
+        this.handleFilterChange();
       }
     });
     this.addChild('sol-input', this.solInput);
-
-    // Search Button
-    this.searchButton = new Button({
-      text: '🔍 Search',
-      onClick: () => this.handleSearch()
-    });
-    this.addChild('search-button', this.searchButton);
 
     // Prev Button
     this.prevButton = new Button({
@@ -165,6 +158,29 @@ export class PageMarsRoverSearch extends BaseComponent<Record<string, unknown>, 
       disabled: this.state.photos.length < 25
     });
     this.addChild('next-button', this.nextButton);
+  }
+
+  private handleFilterChange(): void {
+    // Валидация sol
+    if (this.state.sol < 0) {
+      this.setState({ 
+        error: 'Sol (day) must be a positive number',
+        photos: []
+      });
+      return;
+    }
+
+    if (this.state.sol > 10000) {
+      this.setState({ 
+        error: 'Sol (day) is too large. Please enter a value less than 10000',
+        photos: []
+      });
+      return;
+    }
+
+    // Сбрасываем на первую страницу и загружаем
+    this.setState({ currentPage: 1 });
+    this.loadPhotos();
   }
 
   private async loadPhotos(): Promise<void> {
@@ -196,29 +212,6 @@ export class PageMarsRoverSearch extends BaseComponent<Record<string, unknown>, 
         error: error instanceof Error ? error.message : 'Failed to load photos'
       });
     }
-  }
-
-  private handleSearch(): void {
-    // Валидация sol
-    if (this.state.sol < 0) {
-      this.setState({ 
-        error: 'Sol (day) must be a positive number',
-        photos: []
-      });
-      return;
-    }
-
-    if (this.state.sol > 10000) {
-      this.setState({ 
-        error: 'Sol (day) is too large. Please enter a value less than 10000',
-        photos: []
-      });
-      return;
-    }
-
-    // Если валидация прошла, загружаем фото
-    this.setState({ currentPage: 1 });
-    this.loadPhotos();
   }
 
   private handlePrevPage(): void {
