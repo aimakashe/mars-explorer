@@ -1,6 +1,7 @@
 import { BaseComponent } from '../core/BaseComponent';
 import { Input } from '../components/Input';
 import { Button } from '../components/Button';
+import { Select } from '../components/Select';
 import { marsApi } from '../api/marsApi';
 import { Photo } from '../types/mars';
 import template from 'lodash/template';
@@ -15,7 +16,7 @@ interface PageState {
 }
 
 export class PageMarsRoverSearch extends BaseComponent<Record<string, unknown>, PageState> {
-  private roverInput: Input | null = null;
+  private roverSelect: Select | null = null;
   private solInput: Input | null = null;
   private searchButton: Button | null = null;
   private prevButton: Button | null = null;
@@ -44,14 +45,14 @@ export class PageMarsRoverSearch extends BaseComponent<Record<string, unknown>, 
 
         <div class="search-section">
           <div class="search-inputs">
-            <div data-child-key="rover-input"></div>
+            <div data-child-key="rover-select"></div>
             <div data-child-key="sol-input"></div>
           </div>
           <div data-child-key="search-button"></div>
           
           <div class="search-hint">
-            <p><strong>Available rovers:</strong> Curiosity, Perseverance, Opportunity, Spirit</p>
-            <p><strong>Sol</strong> is a Martian day (slightly longer than Earth day)</p>
+            <p><strong>Rover:</strong> Select a Mars rover from the dropdown</p>
+            <p><strong>Sol:</strong> Martian day number (0-10000)</p>
           </div>
         </div>
 
@@ -112,17 +113,22 @@ export class PageMarsRoverSearch extends BaseComponent<Record<string, unknown>, 
   }
 
   private createComponents(): void {
-    // Rover Input
-    this.roverInput = new Input({
-      label: 'Rover Name',
-      placeholder: 'curiosity, perseverance, opportunity, spirit',
+    // Rover Select
+    this.roverSelect = new Select({
+      label: 'Mars Rover',
+      id: 'rover-select',
+      options: [
+        { value: 'curiosity', label: 'Curiosity' },
+        { value: 'perseverance', label: 'Perseverance' },
+        { value: 'opportunity', label: 'Opportunity' },
+        { value: 'spirit', label: 'Spirit' }
+      ],
       value: this.state.roverName,
-      id: 'rover-input',
       onChange: (value: string) => {
         this.state.roverName = value;
       }
     });
-    this.addChild('rover-input', this.roverInput);
+    this.addChild('rover-select', this.roverSelect);
 
     // Sol Input
     this.solInput = new Input({
@@ -193,47 +199,27 @@ export class PageMarsRoverSearch extends BaseComponent<Record<string, unknown>, 
   }
 
   private handleSearch(): void {
-  // Валидация rover name
-  const validRovers = ['curiosity', 'perseverance', 'opportunity', 'spirit'];
-  const roverName = this.state.roverName.toLowerCase().trim();
-  
-  if (!roverName) {
-    this.setState({ 
-      error: 'Please enter a rover name',
-      photos: []
-    });
-    return;
-  }
+    // Валидация sol
+    if (this.state.sol < 0) {
+      this.setState({ 
+        error: 'Sol (day) must be a positive number',
+        photos: []
+      });
+      return;
+    }
 
-  if (!validRovers.includes(roverName)) {
-    this.setState({ 
-      error: `Invalid rover name. Please use: ${validRovers.join(', ')}`,
-      photos: []
-    });
-    return;
-  }
+    if (this.state.sol > 10000) {
+      this.setState({ 
+        error: 'Sol (day) is too large. Please enter a value less than 10000',
+        photos: []
+      });
+      return;
+    }
 
-  // Валидация sol
-  if (this.state.sol < 0) {
-    this.setState({ 
-      error: 'Sol (day) must be a positive number',
-      photos: []
-    });
-    return;
+    // Если валидация прошла, загружаем фото
+    this.setState({ currentPage: 1 });
+    this.loadPhotos();
   }
-
-  if (this.state.sol > 10000) {
-    this.setState({ 
-      error: 'Sol (day) is too large. Please enter a value less than 10000',
-      photos: []
-    });
-    return;
-  }
-
-  // Если валидация прошла, загружаем фото
-  this.setState({ currentPage: 1, roverName });
-  this.loadPhotos();
-}
 
   private handlePrevPage(): void {
     if (this.state.currentPage > 1) {
@@ -257,14 +243,12 @@ export class PageMarsRoverSearch extends BaseComponent<Record<string, unknown>, 
       
       if (img) {
         img.style.cursor = 'pointer';
-        // Клик на изображение - открыть в новой вкладке
         img.onclick = (e) => {
           e.stopPropagation();
           window.open(img.src, '_blank');
         };
       }
 
-      // Клик на карточку - перейти к детальной странице
       if (card) {
         (card as HTMLElement).style.cursor = 'pointer';
         (card as HTMLElement).onclick = () => {

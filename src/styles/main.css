@@ -463,3 +463,36 @@ body {
     font-size: 2rem;
   }
 }
+
+/* Select styles */
+.select-wrapper {
+  margin-bottom: 1rem;
+}
+
+.select-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #e0e0e0;
+}
+
+.select-field {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #333;
+  border-radius: 4px;
+  background-color: #1a1f3a;
+  color: #ffffff;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.select-field:focus {
+  outline: none;
+  border-color: #4a90e2;
+}
+
+.select-field option {
+  background-color: #1a1f3a;
+  color: #ffffff;
+}
