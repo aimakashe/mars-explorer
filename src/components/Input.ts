@@ -23,7 +23,8 @@ export class Input extends BaseComponent<InputProps, InputState> {
 
   render(): string {
     const { label, placeholder = '', type = 'text', id } = this.props;
-    const { value } = this.state;
+    // Используем value из props, а не из state!
+    const value = this.props.value || '';
 
     return `
       <div class="input-wrapper">
@@ -44,9 +45,15 @@ export class Input extends BaseComponent<InputProps, InputState> {
   }
 
   protected componentDidUpdate(): void {
-    // Удаляем старые обработчики перед добавлением новых
     this.removeEventListeners();
     this.attachEventListeners();
+    // Восстанавливаем фокус, если input был сфокусирован
+    const input = this.element.querySelector('input') as HTMLInputElement;
+    if (input && document.activeElement?.id === input.id) {
+      const cursorPos = input.value.length;
+      input.focus();
+      input.setSelectionRange(cursorPos, cursorPos);
+    }
   }
 
   private attachEventListeners(): void {
@@ -67,19 +74,22 @@ export class Input extends BaseComponent<InputProps, InputState> {
     const target = event.target as HTMLInputElement;
     const value = target.value;
     
-    this.setState({ value });
-
+    // НЕ вызываем setState, только callback!
     if (this.props.onChange) {
       this.props.onChange(value);
     }
   }
 
   public getValue(): string {
-    return this.state.value;
+    const input = this.element.querySelector('input') as HTMLInputElement;
+    return input ? input.value : this.props.value || '';
   }
 
   public setValue(value: string): void {
-    this.setState({ value });
+    const input = this.element.querySelector('input') as HTMLInputElement;
+    if (input) {
+      input.value = value;
+    }
   }
 
   protected componentWillUnmount(): void {
