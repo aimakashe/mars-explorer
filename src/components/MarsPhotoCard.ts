@@ -7,8 +7,13 @@ interface MarsPhotoCardProps {
 }
 
 export class MarsPhotoCard extends BaseComponent<MarsPhotoCardProps> {
+  private handleImageClickBound: ((event: Event) => void) | null = null;
+  private handleCardClickBound: (() => void) | null = null;
+
   constructor(props: MarsPhotoCardProps) {
     super('div', props, {});
+    this.handleImageClickBound = this.handleImageClick.bind(this);
+    this.handleCardClickBound = this.handleCardClick.bind(this);
   }
 
   render(): string {
@@ -32,20 +37,34 @@ export class MarsPhotoCard extends BaseComponent<MarsPhotoCardProps> {
   }
 
   protected componentDidUpdate(): void {
+    this.removeEventListeners();
     this.attachEventListeners();
   }
 
   private attachEventListeners(): void {
     const img = this.element.querySelector('.photo-image') as HTMLImageElement;
-    const card = this.element.querySelector('.photo-card');
+    const card = this.element.querySelector('.photo-card') as HTMLElement;
     
-    if (img) {
+    if (img && this.handleImageClickBound) {
       img.style.cursor = 'pointer';
-      img.addEventListener('click', this.handleImageClick.bind(this));
+      img.addEventListener('click', this.handleImageClickBound);
     }
 
-    if (card) {
-      card.addEventListener('click', this.handleCardClick.bind(this));
+    if (card && this.handleCardClickBound) {
+      card.style.cursor = 'pointer';
+      card.addEventListener('click', this.handleCardClickBound);
+    }
+  }
+
+  private removeEventListeners(): void {
+    const img = this.element.querySelector('.photo-image') as HTMLImageElement;
+    const card = this.element.querySelector('.photo-card') as HTMLElement;
+    
+    if (img && this.handleImageClickBound) {
+      img.removeEventListener('click', this.handleImageClickBound);
+    }
+    if (card && this.handleCardClickBound) {
+      card.removeEventListener('click', this.handleCardClickBound);
     }
   }
 
@@ -62,14 +81,6 @@ export class MarsPhotoCard extends BaseComponent<MarsPhotoCardProps> {
   }
 
   protected componentWillUnmount(): void {
-    const img = this.element.querySelector('.photo-image');
-    const card = this.element.querySelector('.photo-card');
-    
-    if (img) {
-      img.removeEventListener('click', this.handleImageClick.bind(this));
-    }
-    if (card) {
-      card.removeEventListener('click', this.handleCardClick.bind(this));
-    }
+    this.removeEventListeners();
   }
 }

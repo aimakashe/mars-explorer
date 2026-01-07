@@ -12,8 +12,14 @@
   "rules": {
     "semi": ["error", "always"],
     "no-console": "error",
-    "no-unused-vars": "off",
-    "@typescript-eslint/no-unused-vars": "error",
+    "no-unused-vars": "off",  // Отключаем для TypeScript
+    "@typescript-eslint/no-unused-vars": [  // Включаем TypeScript версию
+      "error",
+      {
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_"
+      }
+    ],
     "no-var": "error",
     "no-undef": "error"
   }

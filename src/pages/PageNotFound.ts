@@ -1,7 +1,7 @@
 import { BaseComponent } from '../core/BaseComponent';
 
 export class PageNotFound extends BaseComponent {
-  constructor() {
+  constructor(_params?: Record<string, string>) {
     super('div', {}, {});
   }
 

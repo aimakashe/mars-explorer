@@ -36,6 +36,13 @@ export class PageMarsRoverSearch extends BaseComponent<Record<string, unknown>, 
   render(): string {
     const { photos, loading, error, currentPage } = this.state;
 
+    // Преобразуем photos для безопасного отображения camera
+    const processedPhotos = photos.map(photo => ({
+      ...photo,
+      cameraName: this.getCameraName(photo.camera),
+      earthDate: photo.earth_date || 'N/A'
+    }));
+
     const templateString = `
       <div class="page-mars-rover-search">
         <header class="page-header">
@@ -63,7 +70,11 @@ export class PageMarsRoverSearch extends BaseComponent<Record<string, unknown>, 
           </div>
         <% } else if (error) { %>
           <div class="error">
-            <p>⚠️ <%= error %></p>
+            <h2>⚠️ Error Loading Photos</h2>
+            <p><%= error %></p>
+            <% if (error.includes('404')) { %>
+              <p style="margin-top: 1rem; color: #888;">This rover may not have photos for Sol <%= sol %>. Try a different Sol value or rover.</p>
+            <% } %>
             <button class="retry-button" onclick="location.reload()">Try Again</button>
           </div>
         <% } else if (photos.length === 0) { %>
@@ -73,16 +84,16 @@ export class PageMarsRoverSearch extends BaseComponent<Record<string, unknown>, 
           </div>
         <% } else { %>
           <div class="results-info">
-            <p>Found <%= photos.length %> photos</p>
+            <p>Showing <%= photos.length %> photo<%= photos.length !== 1 ? 's' : '' %> on this page</p>
           </div>
           
           <div class="photo-grid">
-            <% photos.forEach((photo, index) => { %>
+            <% processedPhotos.forEach(function(photo) { %>
               <div class="photo-card" data-photo-id="<%= photo.id %>">
                 <img src="<%= photo.img_src %>" alt="Mars photo from <%= photo.rover.name %>" class="photo-image" />
                 <div class="photo-info">
-                  <p class="photo-camera"><strong>Camera:</strong> <%= photo.camera.full_name %></p>
-                  <p class="photo-date"><strong>Date:</strong> <%= photo.earth_date %></p>
+                  <p class="photo-camera"><strong>Camera:</strong> <%= photo.cameraName %></p>
+                  <p class="photo-date"><strong>Date:</strong> <%= photo.earthDate %></p>
                   <p class="photo-rover"><strong>Rover:</strong> <%= photo.rover.name %></p>
                   <p class="photo-sol"><strong>Sol:</strong> <%= photo.sol %></p>
                 </div>
@@ -100,20 +111,95 @@ export class PageMarsRoverSearch extends BaseComponent<Record<string, unknown>, 
     `;
 
     const compiled = template(templateString);
-    return compiled({ photos, loading, error, currentPage });
+    return compiled({ 
+      photos, 
+      processedPhotos, 
+      loading, 
+      error, 
+      currentPage,
+      sol: this.state.sol 
+    });
+  }
+
+  // Вспомогательный метод для безопасного получения имени камеры
+  private getCameraName(camera: unknown): string {
+    if (!camera) return 'Unknown';
+    
+    if (typeof camera === 'string') {
+      return camera;
+    }
+    
+    if (typeof camera === 'object' && camera !== null) {
+      const cam = camera as { 
+        name?: string | { filter_name?: string }; 
+        full_name?: string | { filter_name?: string };
+      };
+      
+      // Проверяем name
+      if (cam.name) {
+        if (typeof cam.name === 'string') {
+          return cam.name;
+        }
+        if (typeof cam.name === 'object' && cam.name.filter_name) {
+          return cam.name.filter_name;
+        }
+      }
+      
+      // Проверяем full_name
+      if (cam.full_name) {
+        if (typeof cam.full_name === 'string') {
+          return cam.full_name;
+        }
+        if (typeof cam.full_name === 'object' && cam.full_name.filter_name) {
+          return cam.full_name.filter_name;
+        }
+      }
+    }
+    
+    return 'Unknown';
   }
 
   protected componentDidMount(): void {
+    // Пытаемся восстановить сохраненное состояние
+    const savedState = localStorage.getItem('mars_rover_state');
+    if (savedState) {
+      try {
+        const parsed = JSON.parse(savedState);
+        this.state.roverName = parsed.roverName || 'curiosity';
+        this.state.sol = parsed.sol || 1000;
+        this.state.currentPage = parsed.currentPage || 1;
+        localStorage.removeItem('mars_rover_state');
+      } catch {
+        // Обработка ошибок
+      }
+    }
+
     this.createComponents();
     this.loadPhotos();
   }
 
   protected componentDidUpdate(): void {
+    // Не пересоздаем Input и Select, только обновляем кнопки и listeners
+    this.updatePaginationButtons();
     this.attachPhotoClickListeners();
   }
 
+  private updatePaginationButtons(): void {
+    // Обновляем только состояние кнопок пагинации
+    const isPrevDisabled = this.state.currentPage === 1;
+    const isNextDisabled = this.state.photos.length < 25;
+
+    if (this.prevButton) {
+      this.prevButton.setDisabled(isPrevDisabled);
+    }
+
+    if (this.nextButton) {
+      this.nextButton.setDisabled(isNextDisabled);
+    }
+  }
+
   private createComponents(): void {
-    // Rover Select - ВСЕ 4 ровера как в требованиях
+    // Rover Select
     this.roverSelect = new Select({
       label: 'Rover Name',
       id: 'rover-select',
@@ -125,12 +211,13 @@ export class PageMarsRoverSearch extends BaseComponent<Record<string, unknown>, 
       ],
       value: this.state.roverName,
       onChange: (value: string) => {
+        // Не вызываем setState, просто сохраняем значение
         this.state.roverName = value;
       }
     });
     this.addChild('rover-select', this.roverSelect);
 
-    // Sol Input
+    // не вызываем setState при вводе
     this.solInput = new Input({
       label: 'Martian Sol (Day)',
       placeholder: '1000',
@@ -138,23 +225,31 @@ export class PageMarsRoverSearch extends BaseComponent<Record<string, unknown>, 
       type: 'number',
       id: 'sol-input',
       onChange: (value: string) => {
-        this.state.sol = parseInt(value) || 1000;
+        const numValue = parseInt(value);
+        if (!isNaN(numValue)) {
+          // Не вызываем setState, просто сохраняем значение
+          this.state.sol = numValue;
+        }
       }
     });
     this.addChild('sol-input', this.solInput);
 
-    // Search Button - ОБЯЗАТЕЛЬНА по требованиям
+    // Search Button
     this.searchButton = new Button({
       text: '🔍 Search',
       onClick: () => this.handleSearch()
     });
     this.addChild('search-button', this.searchButton);
 
+    // Всегда создаем кнопки пагинации
+    const isPrevDisabled = this.state.currentPage === 1;
+    const isNextDisabled = this.state.photos.length < 25;
+
     // Prev Button
     this.prevButton = new Button({
       text: '← Previous',
       onClick: () => this.handlePrevPage(),
-      disabled: this.state.currentPage === 1
+      disabled: isPrevDisabled
     });
     this.addChild('prev-button', this.prevButton);
 
@@ -162,13 +257,12 @@ export class PageMarsRoverSearch extends BaseComponent<Record<string, unknown>, 
     this.nextButton = new Button({
       text: 'Next →',
       onClick: () => this.handleNextPage(),
-      disabled: this.state.photos.length < 25
+      disabled: isNextDisabled
     });
     this.addChild('next-button', this.nextButton);
   }
 
   private handleSearch(): void {
-    // Валидация sol
     if (this.state.sol < 0) {
       this.setState({ 
         error: 'Sol (day) must be a positive number',
@@ -185,7 +279,6 @@ export class PageMarsRoverSearch extends BaseComponent<Record<string, unknown>, 
       return;
     }
 
-    // Сброс на первую страницу и загрузка
     this.setState({ currentPage: 1 });
     this.loadPhotos();
   }
@@ -205,17 +298,9 @@ export class PageMarsRoverSearch extends BaseComponent<Record<string, unknown>, 
         loading: false
       });
 
-      // Update button states
-      if (this.prevButton) {
-        this.prevButton.setDisabled(this.state.currentPage === 1);
-      }
-      if (this.nextButton) {
-        this.nextButton.setDisabled(response.photos.length < 25);
-      }
-
     } catch (error) {
       this.setState({
-        loading: false,
+        loading: false, 
         error: error instanceof Error ? error.message : 'Failed to load photos'
       });
     }
@@ -253,6 +338,11 @@ export class PageMarsRoverSearch extends BaseComponent<Record<string, unknown>, 
         (card as HTMLElement).style.cursor = 'pointer';
         (card as HTMLElement).onclick = () => {
           if (photoId) {
+            localStorage.setItem('mars_rover_state', JSON.stringify({
+              roverName: this.state.roverName,
+              sol: this.state.sol,
+              currentPage: this.state.currentPage
+            }));
             window.location.hash = `/photo/${photoId}`;
           }
         };

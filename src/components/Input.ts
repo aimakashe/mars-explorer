@@ -10,21 +10,21 @@ interface InputProps {
 }
 
 interface InputState {
-  value: string;
+  internalValue: string;
 }
 
 export class Input extends BaseComponent<InputProps, InputState> {
   private handleInputBound: ((event: Event) => void) | null = null;
 
   constructor(props: InputProps) {
-    super('div', props, { value: props.value || '' });
+    super('div', props, { internalValue: props.value || '' });
     this.handleInputBound = this.handleInput.bind(this);
   }
 
   render(): string {
     const { label, placeholder = '', type = 'text', id } = this.props;
-    // Используем value из props, а не из state!
-    const value = this.props.value || '';
+    // используем internalValue для начального значения
+    const value = this.state.internalValue;
 
     return `
       <div class="input-wrapper">
@@ -45,15 +45,7 @@ export class Input extends BaseComponent<InputProps, InputState> {
   }
 
   protected componentDidUpdate(): void {
-    this.removeEventListeners();
-    this.attachEventListeners();
-    // Восстанавливаем фокус, если input был сфокусирован
-    const input = this.element.querySelector('input') as HTMLInputElement;
-    if (input && document.activeElement?.id === input.id) {
-      const cursorPos = input.value.length;
-      input.focus();
-      input.setSelectionRange(cursorPos, cursorPos);
-    }
+    // НЕ обновляем, чтобы не сбросить фокус
   }
 
   private attachEventListeners(): void {
@@ -74,7 +66,9 @@ export class Input extends BaseComponent<InputProps, InputState> {
     const target = event.target as HTMLInputElement;
     const value = target.value;
     
-    // НЕ вызываем setState, только callback!
+    // Обновляем внутреннее состояние
+    this.state.internalValue = value;
+    
     if (this.props.onChange) {
       this.props.onChange(value);
     }
@@ -82,13 +76,14 @@ export class Input extends BaseComponent<InputProps, InputState> {
 
   public getValue(): string {
     const input = this.element.querySelector('input') as HTMLInputElement;
-    return input ? input.value : this.props.value || '';
+    return input ? input.value : this.state.internalValue;
   }
 
   public setValue(value: string): void {
     const input = this.element.querySelector('input') as HTMLInputElement;
     if (input) {
       input.value = value;
+      this.state.internalValue = value;
     }
   }
 
